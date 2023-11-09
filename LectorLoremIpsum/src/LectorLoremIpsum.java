@@ -1,7 +1,9 @@
 import java.io.*;
+import java.util.TreeMap;
 
 public class LectorLoremIpsum {
 
+    String recursos = "resources/Lorem";
     BufferedReader fEntrada;
     BufferedWriter fSalida;
 
@@ -9,8 +11,9 @@ public class LectorLoremIpsum {
 
 
         LectorLoremIpsum lectorLoremIpsum = new LectorLoremIpsum();
+        lectorLoremIpsum.Limpiar();
         lectorLoremIpsum.CrearDirectorioPrincipal();
-        lectorLoremIpsum.CrearCarpetaParrafo();
+        lectorLoremIpsum.CrearCarpetaParrafoLineas();
 
 
     }
@@ -62,15 +65,16 @@ public class LectorLoremIpsum {
 
 
     }
+    //Si no hay lineas vacias entre parrafos
     public void CrearCarpetaParrafo(){
         int nParrafos = 1;
 
         try {
-            fEntrada = new BufferedReader(new FileReader("resources/Lorem"));
+            fEntrada = new BufferedReader(new FileReader(recursos));
             String parrafo = fEntrada.readLine();
             while (parrafo != null)
             {
-                File file = new File("resources/resultado/parrafo" +nParrafos);
+                File file = new File("resources/resultado/parrafo-" + nParrafos);
                 file.mkdir();
 
 
@@ -80,6 +84,64 @@ public class LectorLoremIpsum {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+        try {
+            fEntrada.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+    //Si los parrafos están separados por lineas enteras
+    public void CrearCarpetaParrafoLineas(){
+        int nParrafos = 1;
+        int SaltosDeLinea = 0;
+
+        try {
+            fEntrada = new BufferedReader(new FileReader(recursos));
+            String parrafo = fEntrada.readLine();
+            while (parrafo != null)
+            {
+
+                if (nParrafos%2 != 0){
+                    File file = new File("resources/resultado/parrafo-" + (nParrafos + SaltosDeLinea));
+                    file.mkdir();
+                    CrearArchivoTxT(file,fEntrada);
+                    parrafo = fEntrada.readLine();
+                }
+                else {
+                    SaltosDeLinea += -1;
+                    parrafo = fEntrada.readLine();
+                }
+                nParrafos++;
+
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+        try {
+            fEntrada.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    public void CrearArchivoTxT(File file, BufferedReader bufferedReader){
+        int npalabras = 0;
+        try {
+            String[] linea = bufferedReader.readLine().split(" ");
+            TreeMap<String,Integer> archivos = new TreeMap<>();
+            while (linea[npalabras] != null){
+                if (!archivos.containsKey(linea[npalabras])){
+                    archivos.put(linea[npalabras],1);
+                    File ArchivoTxT = new File(file.getPath() + linea[npalabras]);
+                }
+                else {
+                    archivos.put(linea[npalabras],archivos.get(linea[npalabras]) + 1);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
 
     }
 }
