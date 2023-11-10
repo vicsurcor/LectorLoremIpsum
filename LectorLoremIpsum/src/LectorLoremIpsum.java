@@ -7,17 +7,8 @@ public class LectorLoremIpsum {
     BufferedReader fEntrada;
     BufferedWriter fSalida;
 
-    public static void main(String[] args) {
 
-
-        LectorLoremIpsum lectorLoremIpsum = new LectorLoremIpsum();
-        lectorLoremIpsum.Limpiar();
-        lectorLoremIpsum.CrearDirectorioPrincipal();
-        lectorLoremIpsum.CrearCarpetaParrafoLineas();
-
-
-    }
-    public void Limpiar(){
+    public void limpiar(){
 
         File dPrincipal = new File("resources/resultado");
         if (dPrincipal.exists())
@@ -47,8 +38,7 @@ public class LectorLoremIpsum {
         }
 
     }
-
-    public void CrearDirectorioPrincipal(){
+    public void crearDirectorioPrincipal(){
 
         File dPrincipal = new File("resources/resultado");
         if (dPrincipal.exists()){
@@ -66,7 +56,7 @@ public class LectorLoremIpsum {
 
     }
     //Si no hay lineas vacias entre parrafos
-    public void CrearCarpetaParrafo(){
+    public void crearCarpetaParrafo(){
         int nParrafos = 1;
 
         try {
@@ -92,7 +82,7 @@ public class LectorLoremIpsum {
 
     }
     //Si los parrafos están separados por lineas enteras
-    public void CrearCarpetaParrafoLineas(){
+    public void crearCarpetaParrafoLineas(){
         int nParrafos = 1;
         int SaltosDeLinea = 0;
 
@@ -101,47 +91,64 @@ public class LectorLoremIpsum {
             String parrafo = fEntrada.readLine();
             while (parrafo != null)
             {
-
                 if (nParrafos%2 != 0){
                     File file = new File("resources/resultado/parrafo-" + (nParrafos + SaltosDeLinea));
                     file.mkdir();
-                    CrearArchivoTxT(file,fEntrada);
-                    parrafo = fEntrada.readLine();
+                    crearArchivoTxT(file,nParrafos);
                 }
                 else {
                     SaltosDeLinea += -1;
-                    parrafo = fEntrada.readLine();
                 }
+                parrafo = fEntrada.readLine();
                 nParrafos++;
-
+            }
+            try {
+                fEntrada.close();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-        try {
-            fEntrada.close();
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+
+
     }
-    public void CrearArchivoTxT(File file, BufferedReader bufferedReader){
+    public void crearArchivoTxT(File file,int nParrafos){
         int npalabras = 0;
+        int parrafo = 0;
         try {
-            String[] linea = bufferedReader.readLine().split(" ");
-            TreeMap<String,Integer> archivos = new TreeMap<>();
-            while (linea[npalabras] != null){
-                if (!archivos.containsKey(linea[npalabras])){
-                    archivos.put(linea[npalabras],1);
-                    File ArchivoTxT = new File(file.getPath() + linea[npalabras]);
-                }
-                else {
-                    archivos.put(linea[npalabras],archivos.get(linea[npalabras]) + 1);
-                }
+            BufferedReader fIn = new BufferedReader(new FileReader(recursos));
+            while((nParrafos - 1) != parrafo){
+                fIn.readLine();
+                parrafo++;
             }
+            String[] linea = fIn.readLine().split(" ");
+            TreeMap<String,Integer> archivos = new TreeMap<>();
+            while (linea[npalabras] != null && npalabras < (linea.length) - 1) {
+
+                    if (linea[npalabras].contains(",")) {
+                        linea[npalabras] = linea[npalabras].substring(0, linea[npalabras].indexOf(","));
+                    }
+                    if (!archivos.containsKey(linea[npalabras].toLowerCase())) {
+                        archivos.put(linea[npalabras].toLowerCase(), 1);
+                        File archivoTxT = new File(file.getPath() + "/" + linea[npalabras].toLowerCase());
+                        archivoTxT.createNewFile();
+                        fSalida = new BufferedWriter(new FileWriter(archivoTxT));
+                        fSalida.write(String.valueOf(archivos.get(linea[npalabras].toLowerCase())));
+                    } else {
+                        File archivoTxT = new File(file.getPath() + "/" + linea[npalabras].toLowerCase());
+                        archivos.put(linea[npalabras].toLowerCase(), archivos.get(linea[npalabras].toLowerCase()) + 1);
+                        fSalida = new BufferedWriter(new FileWriter(archivoTxT));
+                        fSalida.write(String.valueOf(archivos.get(linea[npalabras].toLowerCase())));
+                    }
+                    npalabras++;
+                    fSalida.close();
+            }
+            fIn.close();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
 
-
     }
+
 }
